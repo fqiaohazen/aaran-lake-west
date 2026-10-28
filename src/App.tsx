@@ -14,8 +14,21 @@ import { DraggableLegend } from './DraggableLegend';
 import { NetworkOverlay, CameraState } from './NetworkOverlay';
 import { StreetViewPanel, StreetViewState } from './StreetViewPanel';
 
-const ENV_API_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined)?.trim() || '';
-const ENV_MAP_ID = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined)?.trim() || 'DEMO_MAP_ID';
+const RAW_ENV_KEY = (
+  (typeof __AMPLIFY_GOOGLE_MAPS_API_KEY__ !== 'undefined' && __AMPLIFY_GOOGLE_MAPS_API_KEY__) ||
+  (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) ||
+  (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) ||
+  ''
+).trim();
+
+const RAW_ENV_MAP_ID = (
+  (typeof __AMPLIFY_GOOGLE_MAPS_MAP_ID__ !== 'undefined' && __AMPLIFY_GOOGLE_MAPS_MAP_ID__) ||
+  (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) ||
+  'DEMO_MAP_ID'
+).trim();
+
+const ENV_API_KEY = RAW_ENV_KEY;
+const ENV_MAP_ID = RAW_ENV_MAP_ID.startsWith('AIza') ? 'DEMO_MAP_ID' : RAW_ENV_MAP_ID || 'DEMO_MAP_ID';
 
 // Arran Lake West Dam on Lakeridge Drive (at Lake Trail Dr / Node F121380 & SV132253)
 const ARRAN_LAKE_DAM_VIEW: CameraState = {
@@ -162,7 +175,7 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  const useGoogleMaps = Boolean(preferGoogleMaps && !gmAuthFailed);
+  const useGoogleMaps = Boolean(preferGoogleMaps && storedApiKey.trim() && !gmAuthFailed);
 
   // Load node and pipe datasets
   useEffect(() => {
